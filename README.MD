@@ -19,3 +19,10 @@ nazwa   |text | Nazwa Produktu
 cena    |real | Cena produktu
 kategor |text | Kategoria produktu 
 ilosc   |int  | Ilosc w magazynie 
+
+# Zmiany wprowadzone (Wymaganie B)
+- Dodano dwa nowe pola do encji produkty: producent i data_dodania.
+- Zaktualizowano:
+  - Model/Tabelę: kolumny producent i data_dodania
+  - API REST: uwzględnia nowe pola przy GET, POST i PUT
+  - Frontend: formularz dodawania/edycji i lista produktów z nowymi polami
