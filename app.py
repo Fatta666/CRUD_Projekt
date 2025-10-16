@@ -29,7 +29,9 @@ def get_produkty():
             'nazwa': produkt['nazwa'],
             'cena': produkt['cena'],
             'kategoria': produkt['kategoria'],
-            'ilosc': produkt['ilosc']
+            'ilosc': produkt['ilosc'],
+            'producent': produkt['producent'],
+            'data_dodania': produkt['data_dodania']
         })
     return jsonify(result)
 
@@ -44,8 +46,8 @@ def add_produkt():
 
     conn = get_db_connection()
     conn.execute(
-        'INSERT INTO produkty (nazwa, cena, kategoria, ilosc) VALUES (?, ?, ?, ?)',
-        (data['nazwa'], data['cena'], data['kategoria'], data['ilosc'])
+        'INSERT INTO produkty (nazwa, cena, kategoria, ilosc, producent, data_dodania) VALUES (?, ?, ?, ?, ?, ?)',
+        (data['nazwa'], data['cena'], data['kategoria'], data['ilosc'], data.get('producent'), data.get('data_dodania'))
     )
     conn.commit()
     conn.close()
@@ -67,10 +69,12 @@ def update_produkt(id):
     cena = data.get('cena', produkt['cena'])
     kategoria = data.get('kategoria', produkt['kategoria'])
     ilosc = data.get('ilosc', produkt['ilosc'])
+    producent = data.get('producent', produkt['producent'])
+    data_dodania = data.get('data_dodania', produkt['data_dodania'])
 
     conn.execute(
-        'UPDATE produkty SET nazwa = ?, cena = ?, kategoria = ?, ilosc = ? WHERE id = ?',
-        (nazwa, cena, kategoria, ilosc, id)
+        'UPDATE produkty SET nazwa = ?, cena = ?, kategoria = ?, ilosc = ?, producent = ?, data_dodania = ? WHERE id = ?',
+        (nazwa, cena, kategoria, ilosc, producent, data_dodania, id)
     )
     conn.commit()
     conn.close()

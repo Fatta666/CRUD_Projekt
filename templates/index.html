@@ -53,6 +53,9 @@
         <input type="number" id="cena" placeholder="Cena" required>
         <input type="text" id="kategoria" placeholder="Kategoria">
         <input type="number" id="ilosc" placeholder="Ilość">
+        <input type="text" id="producent" placeholder="Producent">
+        <input type="date" id="data_dodania" placeholder="Data dodania">
+
         <button type="submit">Zapisz</button>
     </form>
 
@@ -64,6 +67,8 @@
                 <th>Cena</th>
                 <th>Kategoria</th>
                 <th>Ilość</th>
+                <th>Producent</th>
+                <th>Data dodania</th>
                 <th>Akcje</th>
             </tr>
         </thead>
@@ -81,7 +86,7 @@
                 tbody.innerHTML = "";
 
                 if (produkty.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="6">Brak produktów w bazie.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="8">Brak produktów w bazie.</td></tr>`;
                     return;
                 }
 
@@ -93,8 +98,19 @@
                         <td>${p.cena}</td>
                         <td>${p.kategoria}</td>
                         <td>${p.ilosc}</td>
+                        <td>${p.producent || '-'}</td>
+                        <td>${p.data_dodania || '-'}</td>
                         <td>
-                            <button onclick="editProdukt(${p.id}, '${p.nazwa}', ${p.cena}, '${p.kategoria}', ${p.ilosc})">Edytuj</button>
+                            <button onclick="editProdukt(
+                                ${p.id},
+                                decodeURIComponent('${encodeURIComponent(p.nazwa)}'),
+                                ${p.cena},
+                                decodeURIComponent('${encodeURIComponent(p.kategoria)}'),
+                                ${p.ilosc},
+                                decodeURIComponent('${encodeURIComponent(p.producent || '')}'),
+                                '${p.data_dodania || ''}'
+                            )">Edytuj</button>
+
                             <button onclick="deleteProdukt(${p.id})">Usuń</button>
                         </td>
                     `;
@@ -112,7 +128,9 @@
                 nazwa: document.getElementById("nazwa").value,
                 cena: parseFloat(document.getElementById("cena").value),
                 kategoria: document.getElementById("kategoria").value,
-                ilosc: parseInt(document.getElementById("ilosc").value)
+                ilosc: parseInt(document.getElementById("ilosc").value),
+                producent: document.getElementById("producent").value,
+                data_dodania: document.getElementById("data_dodania").value
             };
 
             const method = id ? "PUT" : "POST";
@@ -136,12 +154,14 @@
             }
         }
 
-        function editProdukt(id, nazwa, cena, kategoria, ilosc) {
+        function editProdukt(id, nazwa, cena, kategoria, ilosc, producent, data_dodania) {
             document.getElementById("productId").value = id;
             document.getElementById("nazwa").value = nazwa;
             document.getElementById("cena").value = cena;
             document.getElementById("kategoria").value = kategoria;
             document.getElementById("ilosc").value = ilosc;
+            document.getElementById("producent").value = producent;
+            document.getElementById("data_dodania").value = data_dodania;
         }
 
         loadProdukty();
