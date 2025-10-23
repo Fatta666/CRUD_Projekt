@@ -3,19 +3,12 @@ from database import init_db, get_db_connection
 
 app = Flask(__name__)
 
-# Ініціалізація бази
 init_db()
 
-# --- Головна сторінка ---
 @app.route('/')
 def home():
-    return "API działa! (Flask + SQLite)"
-
-@app.route('/ui')
-def ui():
     return render_template('index.html')
 
-# --- GET /produkty: Отримати всі продукти ---
 @app.route('/produkty', methods=['GET'])
 def get_produkty():
     conn = get_db_connection()
@@ -35,7 +28,6 @@ def get_produkty():
         })
     return jsonify(result)
 
-# --- POST /produkty: Додати новий продукт ---
 @app.route('/produkty', methods=['POST'])
 def add_produkt():
     data = request.get_json()
@@ -54,7 +46,6 @@ def add_produkt():
 
     return jsonify({'message': 'Produkt dodany pomyślnie!'}), 201
 
-# --- PUT /produkty/<id>: Редагувати продукт ---
 @app.route('/produkty/<int:id>', methods=['PUT'])
 def update_produkt(id):
     data = request.get_json()
@@ -64,7 +55,6 @@ def update_produkt(id):
         conn.close()
         return jsonify({'error': 'Produkt nie istnieje'}), 404
 
-    # Використовуємо старі значення, якщо нові не передані
     nazwa = data.get('nazwa', produkt['nazwa'])
     cena = data.get('cena', produkt['cena'])
     kategoria = data.get('kategoria', produkt['kategoria'])
@@ -81,7 +71,6 @@ def update_produkt(id):
 
     return jsonify({'message': 'Produkt zaktualizowany pomyślnie!'})
 
-# --- DELETE /produkty/<id>: Видалити продукт ---
 @app.route('/produkty/<int:id>', methods=['DELETE'])
 def delete_produkt(id):
     conn = get_db_connection()
