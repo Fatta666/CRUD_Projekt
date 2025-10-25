@@ -24,3 +24,17 @@ def init_db():
     ''')
     conn.commit()
     conn.close()
+
+def init_users_table():
+    conn = get_db_connection()
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            login TEXT UNIQUE NOT NULL,
+            hasloHash TEXT NOT NULL,
+            rola TEXT NOT NULL DEFAULT 'USER',
+            created_at TEXT NOT NULL
+        );
+    ''')
+    conn.commit()
+    conn.close()
