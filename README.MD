@@ -4,7 +4,7 @@ Umozliwia dodawanie, edytowanie, usuwanie i przegladanie produktow poprzez REST 
 ## Jak uruchomic projekt
 1. Zainstaluj wymagaane biblioteki: pip install flask 
 2. Uruchom serwer: python app.py 
-3. W przegladarce otworz: http://127.0.0.1:5000/ui
+3. W przegladarce otworz: http://127.0.0.1:5000
 
 Po uruchomieniu zobaczysz prosta strone, ktora pozwala dodawac, edytowac i usuwac produkty.
 ## Endpointy API
