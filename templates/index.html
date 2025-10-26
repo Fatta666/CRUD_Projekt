@@ -2,51 +2,28 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <title>Produkty - CRUD</title>
+    <title>Produkty - CRUD z auth</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f5f5f5;
-            margin: 40px;
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-        form {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
-        input, button {
-            padding: 8px;
-            margin: 5px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        th, td {
-            padding: 10px;
-            border: 1px solid #ddd;
-            text-align: center;
-        }
-        tr:nth-child(even) {
-            background: #f9f9f9;
-        }
-        button {
-            cursor: pointer;
-        }
+        body { font-family: Arial; margin: 40px; background: #f5f5f5; }
+        h1 { text-align:center; }
+        form { background:white; padding:20px; border-radius:10px; margin-bottom:20px; }
+        input, button { padding:8px; margin:5px; }
+        table { width:100%; border-collapse: collapse; background:white; }
+        th, td { padding:10px; border:1px solid #ddd; text-align:center; }
+        tr:nth-child(even) { background:#f9f9f9; }
+        button { cursor:pointer; }
     </style>
 </head>
 <body>
-    <h1>Lista produktów</h1>
+    <h1>Logowanie / Rejestracja</h1>
+    <form id="authForm">
+        <input type="text" id="login" placeholder="Login" required>
+        <input type="password" id="password" placeholder="Hasło" required>
+        <button type="submit" id="loginBtn">Zaloguj</button>
+        <button type="button" id="registerBtn">Zarejestruj</button>
+    </form>
 
+    <h1>Lista produktów</h1>
     <form id="productForm">
         <input type="hidden" id="productId">
         <input type="text" id="nazwa" placeholder="Nazwa" required>
@@ -55,116 +32,19 @@
         <input type="number" id="ilosc" placeholder="Ilość">
         <input type="text" id="producent" placeholder="Producent">
         <input type="date" id="data_dodania" placeholder="Data dodania">
-
         <button type="submit">Zapisz</button>
     </form>
 
     <table>
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Nazwa</th>
-                <th>Cena</th>
-                <th>Kategoria</th>
-                <th>Ilość</th>
-                <th>Producent</th>
-                <th>Data dodania</th>
-                <th>Akcje</th>
+                <th>ID</th><th>Nazwa</th><th>Cena</th><th>Kategoria</th><th>Ilość</th>
+                <th>Producent</th><th>Data dodania</th><th>Akcje</th>
             </tr>
         </thead>
         <tbody id="produktyList"></tbody>
     </table>
 
-    <script>
-        const API_URL = "http://127.0.0.1:5000/produkty";
-
-        async function loadProdukty() {
-            try {
-                const res = await fetch(API_URL);
-                const produkty = await res.json();
-                const tbody = document.getElementById("produktyList");
-                tbody.innerHTML = "";
-
-                if (produkty.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="8">Brak produktów w bazie.</td></tr>`;
-                    return;
-                }
-
-                produkty.forEach(p => {
-                    const row = document.createElement("tr");
-                    row.innerHTML = `
-                        <td>${p.id}</td>
-                        <td>${p.nazwa}</td>
-                        <td>${p.cena}</td>
-                        <td>${p.kategoria}</td>
-                        <td>${p.ilosc}</td>
-                        <td>${p.producent || '-'}</td>
-                        <td>${p.data_dodania || '-'}</td>
-                        <td>
-                            <button onclick="editProdukt(
-                                ${p.id},
-                                decodeURIComponent('${encodeURIComponent(p.nazwa)}'),
-                                ${p.cena},
-                                decodeURIComponent('${encodeURIComponent(p.kategoria)}'),
-                                ${p.ilosc},
-                                decodeURIComponent('${encodeURIComponent(p.producent || '')}'),
-                                '${p.data_dodania || ''}'
-                            )">Edytuj</button>
-
-                            <button onclick="deleteProdukt(${p.id})">Usuń</button>
-                        </td>
-                    `;
-                    tbody.appendChild(row);
-                });
-            } catch (err) {
-                console.error("Błąd ładowania:", err);
-            }
-        }
-
-        document.getElementById("productForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const id = document.getElementById("productId").value;
-            const data = {
-                nazwa: document.getElementById("nazwa").value,
-                cena: parseFloat(document.getElementById("cena").value),
-                kategoria: document.getElementById("kategoria").value,
-                ilosc: parseInt(document.getElementById("ilosc").value),
-                producent: document.getElementById("producent").value,
-                data_dodania: document.getElementById("data_dodania").value
-            };
-
-            const method = id ? "PUT" : "POST";
-            const url = id ? `${API_URL}/${id}` : API_URL;
-
-            await fetch(url, {
-                method: method,
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data)
-            });
-
-            e.target.reset();
-            document.getElementById("productId").value = "";
-            loadProdukty();
-        });
-
-        async function deleteProdukt(id) {
-            if (confirm("Na pewno chcesz usunąć ten produkt?")) {
-                await fetch(`${API_URL}/${id}`, { method: "DELETE" });
-                loadProdukty();
-            }
-        }
-
-        function editProdukt(id, nazwa, cena, kategoria, ilosc, producent, data_dodania) {
-            document.getElementById("productId").value = id;
-            document.getElementById("nazwa").value = nazwa;
-            document.getElementById("cena").value = cena;
-            document.getElementById("kategoria").value = kategoria;
-            document.getElementById("ilosc").value = ilosc;
-            document.getElementById("producent").value = producent;
-            document.getElementById("data_dodania").value = data_dodania;
-        }
-
-        loadProdukty();
-    </script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

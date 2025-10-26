@@ -26,3 +26,10 @@ ilosc   |int  | Ilosc w magazynie
   - Model/Tabelę: kolumny producent i data_dodania
   - API REST: uwzględnia nowe pola przy GET, POST i PUT
   - Frontend: formularz dodawania/edycji i lista produktów z nowymi polami
+
+# URL 
+https://fatta666.pythonanywhere.com/ 
+Login: fatta666
+haslo: 17072005
+
+
