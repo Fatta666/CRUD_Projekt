@@ -1,6 +1,6 @@
-const API_URL = "http://127.0.0.1:5000/produkty";
-const AUTH_URL = "http://127.0.0.1:5000";
-let token = null;
+const API_URL = "/produkty";
+const AUTH_URL = "/";
+let token = localStorage.getItem('access_token') || null;
 
 document.getElementById("authForm").addEventListener("submit", async e => {
     e.preventDefault();
@@ -8,7 +8,7 @@ document.getElementById("authForm").addEventListener("submit", async e => {
     const password = document.getElementById("password").value;
 
     if (e.submitter.id === "loginBtn") {
-        const res = await fetch(`${AUTH_URL}/login`, {
+        const res = await fetch(`${AUTH_URL}login`, {
             method: "POST",
             headers: {"Content-Type":"application/json"},
             body: JSON.stringify({login, password})
@@ -16,10 +16,11 @@ document.getElementById("authForm").addEventListener("submit", async e => {
         const data = await res.json();
         if (res.status === 200) {
             token = data.access_token;
-            alert("Zalogowano!");
+            localStorage.setItem('access_token', token);
+            Swal.fire('Sukces!', 'Zalogowano!', 'success');
             loadProdukty();
         } else {
-            alert(data.msg);
+            Swal.fire('Błąd', data.msg, 'error');
         }
     }
 });
@@ -28,13 +29,13 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     const login = document.getElementById("login").value;
     const password = document.getElementById("password").value;
 
-    const res = await fetch(`${AUTH_URL}/register`, {
+    const res = await fetch(`${AUTH_URL}register`, {
         method: "POST",
         headers: {"Content-Type":"application/json"},
         body: JSON.stringify({login, password})
     });
     const data = await res.json();
-    alert(data.msg);
+    Swal.fire(data.msg);
 });
 
 async function loadProdukty() {
@@ -43,7 +44,7 @@ async function loadProdukty() {
     const tbody = document.getElementById("produktyList");
     tbody.innerHTML = "";
 
-    if (produkty.length === 0) {
+    if (!produkty.length) {
         tbody.innerHTML = `<tr><td colspan="8">Brak produktów w bazie.</td></tr>`;
         return;
     }
@@ -59,8 +60,8 @@ async function loadProdukty() {
             <td>${p.producent || '-'}</td>
             <td>${p.data_dodania || '-'}</td>
             <td>
-                <button onclick="editProdukt(${p.id}, '${p.nazwa}', ${p.cena}, '${p.kategoria}', ${p.ilosc}, '${p.producent || ''}', '${p.data_dodania || ''}')">Edytuj</button>
-                <button onclick="deleteProdukt(${p.id})">Usuń</button>
+                <button class="btn btn-sm btn-warning" onclick="editProdukt(${p.id}, '${p.nazwa}', ${p.cena}, '${p.kategoria}', ${p.ilosc}, '${p.producent || ''}', '${p.data_dodania || ''}')">Edytuj</button>
+                <button class="btn btn-sm btn-danger" onclick="deleteProdukt(${p.id})">Usuń</button>
             </td>
         `;
         tbody.appendChild(row);
@@ -69,7 +70,7 @@ async function loadProdukty() {
 
 document.getElementById("productForm").addEventListener("submit", async e => {
     e.preventDefault();
-    if (!token) return alert("Musisz być zalogowany!");
+    if (!token) return Swal.fire('Błąd','Musisz być zalogowany!','error');
 
     const id = document.getElementById("productId").value;
     const data = {
@@ -98,13 +99,23 @@ document.getElementById("productForm").addEventListener("submit", async e => {
 });
 
 function deleteProdukt(id) {
-    if (!token) return alert("Musisz być zalogowany!");
-    if (confirm("Na pewno chcesz usunąć ten produkt?")) {
-        fetch(`${API_URL}/${id}`, {
-            method: "DELETE",
-            headers: { "Authorization": `Bearer ${token}` }
-        }).then(() => loadProdukty());
-    }
+    if (!token) return Swal.fire('Błąd','Musisz być zalogowany!','error');
+    Swal.fire({
+        title: 'Na pewno chcesz usunąć ten produkt?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Tak',
+        cancelButtonText: 'Nie'
+    }).then(async result => {
+        if (result.isConfirmed) {
+            await fetch(`${API_URL}/${id}`, {
+                method: "DELETE",
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            loadProdukty();
+            Swal.fire('Usunięto!','Produkt został usunięty.','success');
+        }
+    });
 }
 
 function editProdukt(id, nazwa, cena, kategoria, ilosc, producent, data_dodania) {

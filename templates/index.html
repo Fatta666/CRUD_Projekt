@@ -3,40 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <title>Produkty - CRUD z auth</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <style>
-        body { font-family: Arial; margin: 40px; background: #f5f5f5; }
-        h1 { text-align:center; }
-        form { background:white; padding:20px; border-radius:10px; margin-bottom:20px; }
-        input, button { padding:8px; margin:5px; }
-        table { width:100%; border-collapse: collapse; background:white; }
-        th, td { padding:10px; border:1px solid #ddd; text-align:center; }
-        tr:nth-child(even) { background:#f9f9f9; }
-        button { cursor:pointer; }
+        body { padding: 40px; background: #f5f5f5; }
+        h1 { text-align:center; margin-bottom:30px; }
+        form { margin-bottom:20px; }
+        table th, table td { text-align:center; }
     </style>
 </head>
 <body>
+<div class="container">
+
     <h1>Logowanie / Rejestracja</h1>
-    <form id="authForm">
-        <input type="text" id="login" placeholder="Login" required>
-        <input type="password" id="password" placeholder="Hasło" required>
-        <button type="submit" id="loginBtn">Zaloguj</button>
-        <button type="button" id="registerBtn">Zarejestruj</button>
+    <form id="authForm" class="row g-2 mb-4">
+        <div class="col-md-4">
+            <input type="text" id="login" class="form-control" placeholder="Login" required>
+        </div>
+        <div class="col-md-4">
+            <input type="password" id="password" class="form-control" placeholder="Hasło" required>
+        </div>
+        <div class="col-md-4">
+            <button type="submit" id="loginBtn" class="btn btn-primary me-2">Zaloguj</button>
+            <button type="button" id="registerBtn" class="btn btn-success">Zarejestruj</button>
+        </div>
     </form>
 
     <h1>Lista produktów</h1>
-    <form id="productForm">
+    <form id="productForm" class="row g-2 mb-3">
         <input type="hidden" id="productId">
-        <input type="text" id="nazwa" placeholder="Nazwa" required>
-        <input type="number" id="cena" placeholder="Cena" required>
-        <input type="text" id="kategoria" placeholder="Kategoria">
-        <input type="number" id="ilosc" placeholder="Ilość">
-        <input type="text" id="producent" placeholder="Producent">
-        <input type="date" id="data_dodania" placeholder="Data dodania">
-        <button type="submit">Zapisz</button>
+        <div class="col-md-2"><input type="text" id="nazwa" class="form-control" placeholder="Nazwa" required></div>
+        <div class="col-md-1"><input type="number" id="cena" class="form-control" placeholder="Cena" required></div>
+        <div class="col-md-2"><input type="text" id="kategoria" class="form-control" placeholder="Kategoria"></div>
+        <div class="col-md-1"><input type="number" id="ilosc" class="form-control" placeholder="Ilość"></div>
+        <div class="col-md-2"><input type="text" id="producent" class="form-control" placeholder="Producent"></div>
+        <div class="col-md-2"><input type="date" id="data_dodania" class="form-control"></div>
+        <div class="col-md-2"><button type="submit" class="btn btn-primary w-100">Zapisz</button></div>
     </form>
 
-    <table>
-        <thead>
+    <table class="table table-striped table-bordered">
+        <thead class="table-dark">
             <tr>
                 <th>ID</th><th>Nazwa</th><th>Cena</th><th>Kategoria</th><th>Ilość</th>
                 <th>Producent</th><th>Data dodania</th><th>Akcje</th>
@@ -45,6 +53,12 @@
         <tbody id="produktyList"></tbody>
     </table>
 
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
