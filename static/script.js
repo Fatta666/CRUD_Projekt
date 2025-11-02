@@ -2,6 +2,24 @@ const API_URL = "/produkty";
 const AUTH_URL = "/";
 let token = localStorage.getItem('access_token') || null;
 
+const logoutBtn = document.getElementById("logoutBtn");
+const loginBtn = document.getElementById("loginBtn");
+const registerBtn = document.getElementById("registerBtn");
+
+// 🔸 показуємо / ховаємо кнопку Wyloguj
+function updateAuthUI() {
+    if (token) {
+        logoutBtn.style.display = "inline-block";
+        loginBtn.disabled = true;
+        registerBtn.disabled = true;
+    } else {
+        logoutBtn.style.display = "none";
+        loginBtn.disabled = false;
+        registerBtn.disabled = false;
+    }
+}
+updateAuthUI();
+
 document.getElementById("authForm").addEventListener("submit", async e => {
     e.preventDefault();
     const login = document.getElementById("login").value;
@@ -18,6 +36,7 @@ document.getElementById("authForm").addEventListener("submit", async e => {
             token = data.access_token;
             localStorage.setItem('access_token', token);
             Swal.fire('Sukces!', 'Zalogowano!', 'success');
+            updateAuthUI();
             loadProdukty();
         } else {
             Swal.fire('Błąd', data.msg, 'error');
@@ -25,7 +44,7 @@ document.getElementById("authForm").addEventListener("submit", async e => {
     }
 });
 
-document.getElementById("registerBtn").addEventListener("click", async () => {
+registerBtn.addEventListener("click", async () => {
     const login = document.getElementById("login").value;
     const password = document.getElementById("password").value;
 
@@ -36,6 +55,13 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     });
     const data = await res.json();
     Swal.fire(data.msg);
+});
+
+logoutBtn.addEventListener("click", () => {
+    localStorage.removeItem("access_token");
+    token = null;
+    updateAuthUI();
+    Swal.fire('Wylogowano', 'Zostałeś wylogowany.', 'info');
 });
 
 async function loadProdukty() {
@@ -119,6 +145,7 @@ function deleteProdukt(id) {
 }
 
 function editProdukt(id, nazwa, cena, kategoria, ilosc, producent, data_dodania) {
+    if (!token) return Swal.fire('Błąd','Musisz być zalogowany!','error');
     document.getElementById("productId").value = id;
     document.getElementById("nazwa").value = nazwa;
     document.getElementById("cena").value = cena;
