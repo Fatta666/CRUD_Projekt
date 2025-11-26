@@ -32,4 +32,38 @@ https://fatta666.pythonanywhere.com/
 Login: fatta666
 haslo: 17072005
 
+# Integracja API: Żarty o Chucku Norrisie
+1. Opis Integracji
+Ta integracja zastępuje planowaną integrację kursów walut na rzecz prostszego API, co pozwala na szybkie wdrożenie wszystkich aspektów zadania (Warstwa Klienta, Obsługa Błędów, Testy).
+
+Zewnętrzne API: Chuck Norris Jokes API (https://api.chucknorris.io).
+
+Warstwa Serwisowa: Logika API znajduje się w pliku joke_service.py.
+Aby uzyskać losowy żart z Chuck Norris Jokes API, wywołaj:
+
+GET /external/joke
+Zapytanie (cURL)
+curl -X GET http://localhost:5000/external/joke
+Uproszczona Odpowiedź (HTTP 200 OK)
+Baza danych zwraca uproszczony model danych (ID, tekst i URL źródłowy):
+{
+    "joke_id": "9h5e1z-x-s-a-g",
+    "joke_text": "Chuck Norris potrafi pisać skrypty w HTML, które są Turing Complete.",
+    "source_url": "[https://api.chucknorris.io/jokes/9h5e1z-x-s-a-g](https://api.chucknorris.io/jokes/9h5e1z-x-s-a-g)"
+}
+Obsługa BłędówBackend przechwytuje błędy zewnętrzne i zwraca spójne kody HTTP:ScenariuszKod HTTPKomunikatBrak odpowiedzi / Timeout503 Service Unavailable"Usługa żartów chwilowo niedostępna. Spróbuj później."Błąd po stronie API (np. 500)502 Bad Gateway"Błąd zewnętrznego API z żartami."
+Testy Integracyjne
+Wszystkie testy integracyjne dla tego endpointu zostały dodane do pliku test_integration.py i używają mocków, aby symulować odpowiedzi z API Chuck Norris.
+
+Testy sprawdzają:
+
+Poprawną ścieżkę (happy path).
+
+Obsługę błędu serwera zewnętrznego (502).
+
+Obsługę timeoutu/braku połączenia (503).
+Aby uruchomić testy:pytest
+
+
+
 
