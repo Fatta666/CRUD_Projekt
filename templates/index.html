@@ -145,6 +145,24 @@
         <tbody id="produktyList"></tbody>
       </table>
     </div>
+    <hr class="my-5" />
+
+            <h1>Żarty o Chucku Norrisie (Zewnętrzne API)</h1>
+      <div class="row">
+        <div class="col-md-8 offset-md-2 text-center">
+          <button type="button" id="getJokeBtn" class="btn btn-warning mb-3">
+            Pobierz żart o Chucku Norrisie
+          </button>
+
+          <div id="jokeResult" class="card p-4">
+            <p id="jokeStatus" class="text-info">Kliknij przycisk, aby poznać prawdę.</p>
+            
+            <div id="jokeText" style="font-size: 1.2em; font-weight: bold;"></div>
+            <small id="jokeId" class="text-muted mt-2"></small>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <script>
       document.getElementById("data_dodania").max = new Date()

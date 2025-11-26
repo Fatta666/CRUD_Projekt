@@ -4,16 +4,40 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from datetime import datetime, timezone, date
 import jwt
+import requests
+
+from joke_service import JokeClient, ServiceUnavailableError, BadGatewayError
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'secret_key'  # ⚠️ в проде заменить на секрет из env
+app.config['SECRET_KEY'] = 'secret_key'
 
 init_db()
 init_users_table()
 
-# ======= ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =======
+joke_client = JokeClient()
+
+@app.route('/external/joke', methods=['GET'])
+def get_external_joke():
+    """
+    Endpoint для отримання випадкового жарту про Чака Норріса.
+    GET /external/joke
+    """
+    
+    try:
+        joke = joke_client.get_random_joke()
+        return jsonify(joke), 200
+
+    except ServiceUnavailableError as e:
+        return make_error(503, "Service Unavailable", message=str(e))
+        
+    except BadGatewayError as e:
+        return make_error(502, "Bad Gateway", message=str(e))
+    
+    except Exception as e:
+        app.logger.error(f"Nieoczekiwany błąd w API żartów: {e}")
+        return make_error(500, "Internal Server Error", message="Wewnętrzny błąd serwera.")
+
 def now_iso():
-    """Возвращает ISO8601-дату в UTC без микросекунд"""
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
 
 def make_error(status, error, field_errors=None, message=None):
@@ -28,7 +52,6 @@ def make_error(status, error, field_errors=None, message=None):
         payload["message"] = message
     return jsonify(payload), status
 
-# ======= JWT =======
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -45,7 +68,6 @@ def token_required(f):
         return f(*args, **kwargs)
     return decorated
 
-# ======= ROUTES =======
 @app.route('/')
 def home():
     return render_template('index.html')
@@ -54,7 +76,6 @@ def home():
 def health():
     return jsonify({"status": "ok"}), 200
 
-# ======= AUTH =======
 @app.route('/register', methods=['POST'])
 def register():
     data = request.get_json() or {}
@@ -107,7 +128,6 @@ def login():
         token = token.decode()
     return jsonify({'access_token': token}), 200
 
-# ======= PRODUKTY =======
 def validate_produkt_payload(data, partial=False):
     errs = []
     if not partial or 'nazwa' in data:
@@ -163,7 +183,6 @@ def add_produkt():
     data = request.get_json() or {}
     required_fields = ['nazwa', 'cena', 'kategoria', 'ilosc']
 
-    # Проверка обязательных полей
     for field in required_fields:
         if field not in data:
             return make_error(
@@ -172,13 +191,11 @@ def add_produkt():
                 message="Brakuje wymaganych pól"
             )
 
-    # ✅ Добавляем валидацию содержимого
     field_errors = validate_produkt_payload(data)
     if field_errors:
         return make_error(400, "Bad Request", field_errors=field_errors, message="Błędne dane wejściowe")
 
     conn = get_db_connection()
-    # Проверяем, есть ли уже продукт с такой nazwой
     exists = conn.execute('SELECT * FROM produkty WHERE nazwa = ?', (data['nazwa'],)).fetchone()
     if exists:
         conn.close()

@@ -5,6 +5,40 @@ let token = localStorage.getItem("access_token") || null;
 const logoutBtn = document.getElementById("logoutBtn");
 const loginBtn = document.getElementById("loginBtn");
 const registerBtn = document.getElementById("registerBtn");
+
+const getJokeBtn = document.getElementById("getJokeBtn");
+const jokeStatus = document.getElementById("jokeStatus");
+const jokeText = document.getElementById("jokeText");
+const jokeId = document.getElementById("jokeId");
+
+getJokeBtn.addEventListener("click", async () => {
+  jokeStatus.textContent = "Ładowanie...";
+  jokeStatus.className = "text-info";
+  jokeText.textContent = "";
+  jokeId.textContent = "";
+
+  try {
+    const url = `/external/joke`;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (res.status === 200) {
+      jokeStatus.textContent = "Prawda objawiona!";
+      jokeStatus.className = "text-success";
+      jokeText.textContent = data.joke_text;
+      jokeId.textContent = `ID: ${data.joke_id}`;
+    } else {
+      const message = data.message || "Wystąpił nieznany błąd.";
+      jokeStatus.textContent = `Błąd (${res.status}): ${message}`;
+      jokeStatus.className = "text-danger";
+    }
+  } catch (error) {
+    console.error("Błąd sieci:", error);
+    jokeStatus.textContent = "Błąd sieci: nie można połączyć się z serwerem.";
+    jokeStatus.className = "text-danger";
+  }
+});
+
 //
 function updateAuthUI() {
   if (token) {

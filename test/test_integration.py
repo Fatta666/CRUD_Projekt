@@ -7,7 +7,6 @@ from database import init_db, init_users_table, get_db_connection
 def client():
     app.config['TESTING'] = True
     with app.test_client() as client:
-        # Очистка таблицы przed każdym testem
         conn = get_db_connection()
         conn.execute("DELETE FROM produkty")
         conn.commit()
@@ -46,3 +45,58 @@ def test_delete_nonexistent_returns_404(client):
 def test_missing_token_returns_401(client):
     res = client.post('/produkty', json={"nazwa":"P","cena":1,"ilosc":1,"kategoria":"c"})
     assert res.status_code == 401
+
+import requests
+from unittest.mock import Mock
+from app import app
+from joke_service import JokeClient, ServiceUnavailableError, BadGatewayError 
+
+JOKE_MOCK_SUCCESS = {
+    "icon_url": "...", 
+    "id": "abc123xyz", 
+    "url": "https://...", 
+    "value": "Chuck Norris potrafi dzielić przez zero i dostać pieniądze.",
+    "created_at": "...",
+    "updated_at": "..."
+}
+
+
+def mock_response(status_code, json_data=None):
+    """Pomocnicza funkcja do tworzenia odpowiedzi Mock."""
+    mock_resp = Mock()
+    mock_resp.status_code = status_code
+    if json_data is not None:
+        mock_resp.json.return_value = json_data
+    return mock_resp
+
+def test_joke_happy_path(client, mocker):
+    """Test integracyjny 'happy path' - poprawne dane, sensowny JSON."""
+    mock_get = mocker.patch('joke_service.requests.get', return_value=mock_response(200, JOKE_MOCK_SUCCESS))
+
+    res = client.get('/external/joke')
+    assert res.status_code == 200
+    data = res.get_json()
+    
+    mock_get.assert_called_once()
+    
+    assert 'joke_text' in data
+    assert data['joke_text'] == JOKE_MOCK_SUCCESS['value']
+    
+def test_joke_external_server_error_502(client, mocker):
+    """Test błędu: błąd 5xx po stronie zewnętrznego API (502 Bad Gateway)."""
+
+    mock_get = mocker.patch('joke_service.requests.get', return_value=mock_response(500, {}))
+
+    res = client.get('/external/joke')
+    
+    assert res.status_code == 502
+    data = res.get_json()
+    assert data['status'] == 502
+    
+def test_joke_timeout_503(client, mocker):
+    """Test błędu: brak odpowiedzi / timeout (503 Service Unavailable)."""
+    mock_get = mocker.patch('joke_service.requests.get', side_effect=requests.exceptions.Timeout)
+
+    res = client.get('/external/joke')
+    
+    assert res.status_code == 503
